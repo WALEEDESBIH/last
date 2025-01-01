@@ -1,0 +1,105 @@
+{% if user.is_authenticated %}
+{% load static %}
+{% load custom_tags %}
+<!-- partial:partials/_sidebar.html -->
+<aside class="mdc-drawer mdc-drawer--dismissible mdc-drawer--open bg-dark bg-gradient">
+    <div class="mdc-drawer__header border-bottom border-light">
+        <a href="{% url 'inventory:index' %}" class="brand-logo">
+            <h3 class="text-center text-light">StockVision</h3>
+        </a>
+    </div>
+    <style>
+        #circle{
+            width: 16px;
+            height: 16px;
+            background:red;
+            border-radius:50%;
+            -moz-border-radius:50%;
+            -webkit-border-radius:50%;
+            line-height:20px;
+            vertical-align:middle;
+            text-align:center;
+            color:white;
+        }
+    </style>
+    <div class="mdc-drawer__content">
+        <div class="mdc-list-group">
+            <nav class="mdc-list mdc-drawer-menu">
+                <!-- Inventory -->
+                {% if user.is_superuser %}
+                    <div class="mdc-list-item mdc-drawer-item">
+                        <a class="mdc-drawer-link" href="{% url 'inventory:index' %}">
+                            <i class="material-icons mdc-list-item__start-detail mdc-drawer-item-icon" aria-hidden="true">home</i> Inventory
+                        </a>
+                    </div>
+                    
+                    <!-- Category List -->
+                    <div class="mdc-list-item mdc-drawer-item">
+                        <a class="mdc-drawer-link" href="{% url 'inventory:category' %}">
+                            <i class="material-icons mdc-list-item__start-detail mdc-drawer-item-icon" aria-hidden="true">list</i> Category List
+                        </a>
+                    </div>
+
+                    <!-- Product List -->
+                    <div class="mdc-list-item mdc-drawer-item">
+                        <a class="mdc-drawer-link" href="{% url 'inventory:product' %}">
+                            <i class="material-icons mdc-list-item__start-detail mdc-drawer-item-icon" aria-hidden="true">label</i> Product List
+                        </a>
+                    </div>
+
+                    <!-- Inventory Map -->
+                    <div class="mdc-list-item mdc-drawer-item">
+                        <a class="mdc-drawer-link" href="{% url 'inventory:inventory-map' %}">
+                            <i class="material-icons mdc-list-item__start-detail mdc-drawer-item-icon" aria-hidden="true">map</i> Inventory Map
+                        </a>
+                    </div>
+
+                    <!-- Sales -->
+                    <div class="mdc-list-item mdc-drawer-item">
+                        <a class="mdc-drawer-link" href="{% url 'sales:sales-list' %}">
+                            <i class="material-icons mdc-list-item__start-detail mdc-drawer-item-icon" aria-hidden="true">receipt</i> Sales
+                        </a>
+                    </div>
+
+                    <!-- Orders Section (New) -->
+                    <div class="mdc-list-item mdc-drawer-item">
+                        <a class="mdc-drawer-link" href="{% url 'sales:seen' %}">
+                            <i class="material-icons mdc-list-item__start-detail mdc-drawer-item-icon" aria-hidden="true">assignment</i> Orders &emsp;
+                            {% counter as order_count %}  <!-- Get the count of orders -->
+                            {% if order_count %}
+                            <div id="circle">{{order_count}}</div>
+                            {% endif %}
+                        </a>    
+                    </div>
+
+                    <!-- E-Commerce Home Section (New) -->
+                    <div class="mdc-list-item mdc-drawer-item">
+                        <a class="mdc-drawer-link" href="{% url 'e_commerce:home' %}">
+                            <i class="material-icons mdc-list-item__start-detail mdc-drawer-item-icon" aria-hidden="true">store</i>E-Commerce
+                        </a>
+                    </div>
+                {% endif %}
+
+                {% if user.is_staff %}
+                    <!-- POS -->
+                    <div class="mdc-list-item mdc-drawer-item">
+                        <a class="mdc-drawer-link" href="{% url 'pos:pos' %}">
+                            <i class="material-icons mdc-list-item__start-detail mdc-drawer-item-icon" aria-hidden="true">payment</i> POS
+                        </a>
+                    </div>
+                {% endif %}
+
+                {% if user.is_superuser %}
+                    <!-- About -->
+                    <div class="mdc-list-item mdc-drawer-item">
+                        <a class="mdc-drawer-link" href="{% url 'inventory:about' %}">
+                            <i class="material-icons mdc-list-item__start-detail mdc-drawer-item-icon" aria-hidden="true">info</i> About
+                        </a>
+                    </div>
+                {% endif %}
+            </nav>
+        </div>
+    </div>
+</aside>
+{% endif %}
+<!-- partial -->

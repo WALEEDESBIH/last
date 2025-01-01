@@ -1,0 +1,91 @@
+{% extends "partials/base.html" %} 
+{% block pageContent %}
+<div class="mdc-layout-grid__cell stretch-card mdc-layout-grid__cell--span-12">
+    <div class="mdc-card py-4">
+        <div class="d-flex justify-content-between align-items-center">
+            <h4 class="card-title mb-0">Order Details</h4>
+        </div>
+    </div>
+</div>
+
+<div class="mdc-layout-grid__cell stretch-card mdc-layout-grid__cell--span-12">
+    <div class="mdc-card p-4">
+
+            <fieldset>
+
+            </fieldset>
+
+            <fieldset class="mb-4">
+                <div class="d-flex w-100" id="POS-field">
+                    <div class="col-8 bg-light border h-100">
+                        <table class="table table-bordered table-hover">
+                            <thead class="bg-dark text-light">
+                                <tr>
+                                    <th class="text-center text-light">QTY</th>
+                                    <th class="text-center text-light">Product</th>
+                                    <th class="text-center text-light">Price</th>
+                                    <th class="text-center text-light">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in order_items %}
+                                <tr>
+                                    <td class="text-center align-middle">{{ item.quantity }}</td>
+                                    <td class="text-center align-middle">{{ item.product.name }}</td>
+                                    <td class="text-center align-middle">{{ item.price }}</td>
+                                    <td class="text-center align-middle">{{ item.total }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="col-4 bg-gradient border h-100 text-light">
+                        <div class="py-4 px-3">
+                            <dl>
+                                <dt class="h5 text-dark">Sub Total</dt>
+                                <dd class="text-end py-1">
+                                    <input type="hidden" name="sub_total" value="0">
+                                    <span class="h4 text-dark" id="sub_total">{{order.subtotal}}</span>
+                                </dd>
+                                <dt class="h5 text-dark">Tax Inclusive (%)</dt>
+                                <dd>
+                                    <span class="h4 text-dark" id="sub_total">{{order.tax}}</span>
+                                </dd>
+
+                                <dt class="h5 text-dark">Grand Total</dt>
+                                <dd class="text-end py-1">
+                                    <input type="hidden" name="grand_total" value="0">
+                                    <span class="h4 text-dark" id="grand_total">{{order.total}}</span>
+                                </dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+            </fieldset>
+
+            <div class="row">
+                <div class="col-md-12 text-end">
+                    <a class="btn btn-success btn-sm rounded-0" href="{% url 'pos:confirm-order' order.id %}" id="check_out">
+                        <i class="mdi mdi-save"></i> Checkout
+                    </a>
+                </div>
+            </div>
+    </div>
+</div>
+
+<noscript id="item-clone">
+    <tr>
+        <td class="text-center">
+            <button class="btn btn-sm btn-outline-danger rounded-0 rem-item" type="button">
+                <i class="mdi mdi-close"></i>
+            </button>
+        </td>
+        <td>
+        </td>
+        <td class="product_name text-start"></td>
+        <td class="product_price text-end"></td>
+        <td class="product_total text-end"></td>
+    </tr>
+</noscript>
+{% endblock pageContent %}
+

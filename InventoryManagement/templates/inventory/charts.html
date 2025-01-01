@@ -1,0 +1,43 @@
+
+
+<!-- Chart Page Header -->
+<div class="mdc-layout-grid__cell stretch-card mdc-layout-grid__cell--span-12 text-center">
+    <div class="mdc-card">
+        <h4 class="card-title">Charts Overview</h4>
+        <p class="tx-12 text-muted">Visual representation of orders and product availability</p>
+
+
+
+<div class="mdc-layout-grid__cell stretch-card mdc-layout-grid__cell--span-12 d-flex justify-content-center my-4">
+    <div class="container">
+        <div class="row justify-content-center">
+            <!-- Bar Chart -->
+            <div class="col-24 col-md-12 mb-8">
+                <div class="mdc-card">
+                    {% if bar_chart_html %}
+                        {{ bar_chart_html|safe }}
+                    {% else %}
+                        <p class="no-chart">No plot available.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+            <!-- Pie Chart -->
+            <div class="col-12 col-md-6 mb-4">
+                <div class="mdc-card" style="height: 400px; width: 700px; display: flex; justify-content: center; align-items: center; border-radius: 6px;">
+                    {% if pie_chart_html %}
+                        {{ pie_chart_html|safe }}
+                    {% else %}
+                        <p class="no-chart">No plot available.</p>
+                    {% endif %}
+                </div>
+            </div>
+
+
+        </div>
+    </div>

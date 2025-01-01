@@ -1,0 +1,119 @@
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Billing Invoice</title>
+    {%load cart_tag%}
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+        }
+        .billing-container {
+            background-color: #fff;
+            width: 80%;
+            max-width: 600px;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        h2 {
+            text-align: center;
+            color: #333;
+        }
+        .billing-info, .billing-summary {
+            margin: 15px 0;
+        }
+        .billing-info table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .billing-info th, .billing-info td {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+        }
+        .billing-summary {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+        }
+        .billing-summary div {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            font-weight: bold;
+        }
+        .total {
+            color: #e67e22;
+        }
+        .print-btn {
+            width: 30%;
+            padding: 10px;
+            background-color: #27ae60;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 20px;
+            text-align: center;
+        }
+        .print-btn:hover {
+            background-color: #219150;
+        }
+        /* Hide the print button when printing */
+        @media print {
+            .print-btn {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="billing-container">
+    <h2>Billing Invoice</h2>
+    <div class="billing-info">
+        <h2>Invoice for {{ order.firstname }} {{ order.lastname }}</h2>
+<p>Order Date: {{ order.date }}</p>
+<table>
+    <thead>
+        <tr>
+            <th>Product</th>
+            <th>Quantity</th>
+            <th>Price</th>
+            <th>Total</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in order_items %}
+            <tr>
+                <td>{{ item.product.name }}</td>
+                <td>{{ item.quantity }}</td>
+                <td>{{ item.price }}</td>
+                <td>{{ item.total }}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+    </div>
+
+    <div class="billing-summary">
+        <div><span>Subtotal:</span><span>${{ order.subtotal }}</span></div>
+        <div><span>Tax (2.75%):</span><span>${{ order.tax|multiply:order.subtotal}}</span></div>
+        <div class="total"><span>Total:</span><span>${{order.total  }}</span></div>
+    </div>
+    <div>
+    <div class="text-center mt-4">
+    <button class="print-btn" onclick="window.print()">Print Bill</button>
+ </div>
+</div>
+</div>
+<br>

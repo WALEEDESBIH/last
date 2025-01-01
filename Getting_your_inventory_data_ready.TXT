@@ -1,0 +1,10 @@
+For getting your inventory data ready properly before you add anyting to your DB, first you need to follow these steps:
+1- Open python shell and run the following commands:
+2- from inventory.models import Inventory, InventoryLocation
+3- from e_commerce.utils import generate_locations_for_inventory
+4- inventory = Inventory.objects.create(name='Warehouse A', rows_number=7, columns_number=7, layers_number=7)
+5- generate_locations_for_inventory(inventory)
+
+you're free to specify your actual inventory features (e.g. name, rows, columns, layers)
+
+Good Luck :)

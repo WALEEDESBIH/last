@@ -1,0 +1,178 @@
+
+    <div class="order-confirmation-container">
+        <h1 class="order-confirmation-title">Thank you for your order, {{ user.first_name }}!</h1>
+        <p class="order-summary-text">Your order has been successfully placed. Here's a summary of your order:</p>
+        
+        <div class="order-details">
+            <div class="order-number">
+                <h2>Order Number: {{ order.id }}</h2>
+            </div>
+
+            <div class="order-items">
+                <h3>Order Summary:</h3>
+                <table class="order-items-table">
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Quantity</th>
+                            <th>Price</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in order.orderitem_set.all %}
+                        <tr>
+                            <td>
+                                <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" class="product-image" />
+                                {{ item.product.name }}
+                            </td>
+                            <td>{{ item.quantity }}</td>
+                            <td>${{ item.price }}</td>
+                            <td>${{ item.total }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="shipping-details">
+                <h3>Shipping Details:</h3>
+                <p><strong>Name:</strong> {{ order.firstname }} {{ order.lastname }}</p>
+                <p><strong>Address:</strong> {{ order.address }}, {{ order.city }}, {{ order.contry }} - {{ order.postcode }}</p>
+                <p><strong>Phone:</strong> {{ order.phone }}</p>
+                <p><strong>Email:</strong> {{ order.email }}</p>
+            </div>
+
+            <div class="order-summary">
+                <h3>Order Total:</h3>
+                <table class="order-summary-table">
+                    <tr>
+                        <td>Subtotal:</td>
+                        <td>${{ cart_total }}</td>
+                    </tr>
+                    <tr>
+                        <td>Shipping:</td>
+                        <td>${{ shipping_cost }}</td>
+                    </tr>
+                    <tr>
+                        <td>Tax (2.75%):</td>
+                        <td>${{ tax }}</td>
+                    </tr>
+                    <tr class="order-total">
+                        <td><strong>Total:</strong></td>
+                        <td><strong>${{ total_amount }}</strong></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="thank-you-message">
+            <p>Thank you for shopping with us! You will receive a confirmation email shortly with your order details.</p>
+        </div>
+
+        <div class="order-navigation">
+            <a href="{% url 'e_commerce:home' %}" class="btn-continue-shopping">Continue Shopping</a>
+        </div>
+    </div>
+<style>
+    .order-confirmation-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+        font-family: Arial, sans-serif;
+    }
+
+    .order-confirmation-title {
+        font-size: 32px;
+        font-weight: bold;
+        color: #FF9900;
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .order-summary-text {
+        text-align: center;
+        margin-bottom: 20px;
+        font-size: 18px;
+        color: #333;
+    }
+
+    .order-details {
+        background-color: #f7f7f7;
+        padding: 20px;
+        border-radius: 8px;
+        margin-bottom: 40px;
+    }
+
+    .order-number h2 {
+        color: #333;
+    }
+
+    .order-items-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+
+    .order-items-table th, .order-items-table td {
+        padding: 10px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+    }
+
+    .product-image {
+        width: 50px;
+        height: 50px;
+        margin-right: 10px;
+    }
+
+    .shipping-details p {
+        font-size: 16px;
+        color: #333;
+    }
+
+    .order-summary-table {
+        width: 100%;
+        margin-top: 20px;
+        text-align: right;
+    }
+
+    .order-summary-table td {
+        padding: 10px;
+        font-size: 16px;
+    }
+
+    .order-total td {
+        font-weight: bold;
+        font-size: 18px;
+    }
+
+    .thank-you-message {
+        text-align: center;
+        font-size: 18px;
+        margin-bottom: 20px;
+        color: #333;
+    }
+
+    .order-navigation {
+        text-align: center;
+        margin-top: 30px;
+    }
+
+    .btn-continue-shopping,
+    .btn-order-history {
+        display: inline-block;
+        margin: 10px;
+        padding: 10px 20px;
+        background-color: #FF9900;
+        color: #fff;
+        text-decoration: none;
+        border-radius: 4px;
+        font-size: 16px;
+    }
+
+    .btn-continue-shopping:hover,
+    .btn-order-history:hover {
+        background-color: #e68900;
+    }
+</style>

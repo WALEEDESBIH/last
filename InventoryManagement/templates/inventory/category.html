@@ -1,0 +1,133 @@
+{% extends "partials/base.html" %} 
+{% block pageContent %}
+<!-- Page Header -->
+<div class="mdc-layout-grid__cell stretch-card mdc-layout-grid__cell--span-12">
+    <div class="mdc-card py-2">
+        <div class="d-flex justify-content-between align-items-center">
+            <h4 class="card-title mb-0">Category List</h4>
+            <div class="text-start">
+                <button class="btn btn-primary bg-gradient btn-sm rounded-0" id="create_new">
+                    <i class="mdi mdi-plus"></i><span> Add New</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Category Name Filter -->
+<div class="mdc-layout-grid__cell stretch-card mdc-layout-grid__cell--span-12">
+    <div class="mdc-card py-2">
+        <div class="d-flex justify-content-between align-items-center">
+            <div class="col-md-6">
+                <input type="text" class="form-control" id="filterCategoryName" placeholder="Search by Category Name">
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Category Table -->
+<div class="mdc-layout-grid__cell stretch-card mdc-layout-grid__cell--span-12">
+    <div class="mdc-card">
+        <div class="table-responsive">
+            <table class="table table-hover table-striped table-bordered" id="categoryTable">
+                <thead class="table-dark">
+                    <tr>
+                        <th class="text-center py-2">#</th>
+                        <th class="text-center py-2">Category Name</th>
+                        <th class="text-center py-2">Description</th>
+                        <th class="text-center py-2">Status</th>
+                        <th class="text-center py-2">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for cat in category %}
+                    <tr>
+                        <td class="text-center align-middle">{{ cat.id }}</td>
+                        <td class="text-center align-middle">{{ cat.name }}</td>
+                        <td class="text-center align-middle">{{ cat.description |slice:":20" }}{% if cat.description|length > 20 %}...{% endif %}</td>
+                        <td class="text-center align-middle">
+                            {% if cat.active %}
+                            <span class="badge bg-success rounded-pill">Active</span>
+                            {% else %}
+                            <span class="badge bg-danger rounded-pill">Inactive</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-center align-middle">
+                            <button class="btn btn-warning btn-sm edit-data" type="button" data-id="{{ cat.pk }}" title="Edit">
+                                <i class="mdi mdi-pencil"></i>
+                            </button>
+                            <button class="btn btn-danger btn-sm delete-data" type="button" data-id="{{ cat.pk }}" title="Delete">
+                                <i class="mdi mdi-delete"></i>
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock pageContent %}
+
+{% block ScriptBlock %}
+<script>
+    $(function() {
+        // Filter by Category Name
+        $('#filterCategoryName').on('input', function() {
+            var searchValue = $(this).val().toLowerCase();
+            $('#categoryTable tbody tr').each(function() {
+                var row = $(this);
+                var categoryName = row.find('td').eq(1).text().toLowerCase();
+                if (categoryName.includes(searchValue)) {
+                    row.show();
+                } else {
+                    row.hide();
+                }
+            });
+        });
+
+        // Add New Category
+        $('#create_new').click(function() {
+            uni_modal("Add New Category", "{% url 'inventory:manage-category' %}")
+        });
+
+        // Edit Category
+        $('.edit-data').click(function() {
+            uni_modal("Edit Category", "{% url 'inventory:manage-category' %}?id=" + $(this).attr('data-id'))
+        });
+
+        // Delete Category
+        $('.delete-data').click(function() {
+            _conf("Are you sure to delete this Category?", "delete_category", [$(this).attr('data-id')])
+        });
+    });
+
+    function delete_category($id) {
+        start_loader();
+        $.ajax({
+            headers: {
+                "X-CSRFToken": '{{csrf_token}}'
+            },
+            url: "{% url 'inventory:delete-category' %}",
+            method: "POST",
+            data: {
+                id: $id
+            },
+            dataType: "json",
+            error: err => {
+                console.log(err)
+                alert_toast("An error occurred.", 'error');
+                end_loader();
+            },
+            success: function(resp) {
+                if (typeof resp == 'object' && resp.status == 'success') {
+                    location.reload();
+                } else {
+                    alert_toast("An error occurred.", 'error');
+                    end_loader();
+                }
+            }
+        })
+    }
+</script>
+{% endblock ScriptBlock %}

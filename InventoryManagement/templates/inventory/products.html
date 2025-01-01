@@ -1,0 +1,211 @@
+{% extends "partials/base.html" %} 
+{% block pageContent %}
+
+<!-- Page Header -->
+<div class="mdc-layout-grid__cell stretch-card mdc-layout-grid__cell--span-12">
+    <div class="mdc-card py-2">
+        <div class="d-flex justify-content-between align-items-center">
+            <h4 class="card-title mb-0">Product List</h4>
+            <div class="text-start">
+                <a  href="{% url 'pos:inbound' %}" class="btn btn-outline-success bg-gradient btn-sm rounded-0" >
+                    <i class="mdi mdi-plus"></i><span> Inbound</span>
+                </a>
+
+                <button class="btn btn-primary bg-gradient btn-sm rounded-0" id="create_new">
+                    <i class="mdi mdi-plus"></i><span> Add New</span>
+                    
+                </button>
+
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+<!-- Filters -->
+<div class="mdc-layout-grid__cell stretch-card mdc-layout-grid__cell--span-12">
+    <div class="mdc-card py-2">
+        <div class="d-flex justify-content-between align-items-center">
+            <div class="col-md-4">
+                <input type="text" class="form-control" id="filterId" placeholder="Search by ID">
+            </div>
+            <div class="col-md-4">
+                <input type="text" class="form-control" id="filterName" placeholder="Search by Name">
+            </div>
+            <div class="col-md-4">
+                <select class="form-control" id="filterCategory">
+                    <option value="">Select Category</option>
+                    {% for category in categories %}
+                        <option value="{{ category }}">{{ category }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Product Table -->
+<div class="mdc-layout-grid__cell stretch-card mdc-layout-grid__cell--span-12">
+    <div class="mdc-card">
+        <div class="table-responsive">
+            <table class="table table-striped table-bordered table-hover" id="productTable">
+                <thead class="thead-light">
+                    <tr>
+                        <th class="text-center py-3">#</th>
+                        <th class="text-center py-3">Product</th>
+                        <th class="text-center py-3">Category</th>
+                        <th class="text-center py-3">Description</th>
+                        <th class="text-center py-3">On Hand</th>
+                        <th class="text-center py-3">Committed</th>
+                        <th class="text-center py-3">Available</th>
+                        <th class="text-center py-3">Status</th>
+                        <th class="text-center py-3">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for product in products %}
+                    <tr>
+                        <td class="text-center">{{ product.vocab_no }}</td>
+                        <td>{{ product.name }}</td>
+                        <td>{{ product.category }}</td>
+                        <td>{{ product.description1|slice:":20" }}{% if product.description1|length > 20 %}...{% endif %}</td>
+                        <td>{{ product.stocks_on_hand }}</td>
+                        <td>{{ product.stocks_committed }}</td>
+                        <td>{{ product.stocks_availability }}</td>
+                        <td class="text-center">
+                            {% if product.active %}
+                            <span class="badge bg-primary rounded-pill">Active</span>
+                            {% else %}
+                            <span class="badge bg-secondary rounded-pill">Inactive</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-center">
+                            <a href="{% url 'inventory:update-product' product.pk %}" class="mdc-button mdc-button--raised edit-data" title="Update" style="background-color: #FFA500; color: white;">
+                                <i class="material-icons mdc-button__icon">edit</i>
+                            </a>
+                            <button class="mdc-button mdc-button--raised delete-data" data-id="{{ product.pk }}" title="Delete" style="background-color: #FF5733; color: white;">
+                                <i class="material-icons mdc-button__icon">delete_outline</i>
+                            </button>
+                            <a class="mdc-button mdc-button--raised view-data" href="{% url 'inventory:product-page' product.pk %}" title="View" style="background-color: #28a745; color: white;">
+                                <i class="material-icons mdc-button__icon">visibility</i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+        </div>
+                    <!-- Display Top 10 Stocks Plot -->
+                    <div class="text-center my-4">
+                        {% if plot_html %}
+                            {{ plot_html|safe }}
+                        {% else %}
+                            <p>No plot available. Please submit the form to view the chart.</p>
+                            {% if error %}
+                            <div class="alert alert-danger text-center">
+                                {{ error }}
+                            </div>
+                            {% endif %}
+                        {% endif %}
+                    </div>
+    </div>
+</div>
+
+{% endblock pageContent %}
+
+{% block ScriptBlock %}
+<script>
+    $(function() {
+        // Filter Functionality
+        $('#filterId, #filterName, #filterCategory').on('input change', function() {
+            filterTable();
+        });
+
+        function filterTable() {
+            const filterId = $('#filterId').val().toLowerCase();
+            const filterName = $('#filterName').val().toLowerCase();
+            const filterCategory = $('#filterCategory').val().toLowerCase();
+            
+            $('#productTable tbody tr').each(function() {
+                const row = $(this);
+                const id = row.find('td').eq(0).text().toLowerCase();
+                const name = row.find('td').eq(1).text().toLowerCase();
+                const category = row.find('td').eq(2).text().toLowerCase();
+
+                if (id.includes(filterId) && name.includes(filterName) && category.includes(filterCategory)) {
+                    row.show();
+                } else {
+                    row.hide();
+                }
+            });
+        }
+
+        // Create new product modal
+        $('#create_new').click(function() {
+            uni_modal("Add New Product", "{% url 'inventory:manage-product' %}");
+        });
+
+        // Delete product confirmation
+        $('.delete-data').click(function() {
+            _conf("Are you sure to delete this Product?", "delete_product", [$(this).data('id')]);
+        });
+
+        $('#uni_modal').on('shown.bs.modal', function() {
+            $('#category_id').select2({
+                placeholder: "Please Select Category Here",
+                width: '100%',
+                dropdownParent: $('#uni_modal')
+            });
+        });
+    });
+
+    function delete_product(id) {
+        start_loader();
+        $.ajax({
+            headers: { "X-CSRFToken": '{{ csrf_token }}' },
+            url: "{% url 'inventory:delete-product' %}",
+            method: "POST",
+            data: { id: id },
+            dataType: "json",
+            error: function(err) {
+                console.log(err);
+                alert_toast("An error occurred.", 'error');
+                end_loader();
+            },
+            success: function(resp) {
+                if (typeof resp === 'object' && resp.status === 'success') {
+                    location.reload();
+                } else {
+                    alert_toast("An error occurred.", 'error');
+                    end_loader();
+                }
+            }
+        });
+    }
+</script>
+{% endblock ScriptBlock %}
+
+<style>
+    table {
+        border-collapse: separate;
+        border-spacing: 0 10px;
+    }
+    th {
+        background-color: #f8f9fa;
+        color: #333;
+        font-weight: 600;
+    }
+    tbody tr {
+        background-color: #fff;
+        transition: background-color 0.3s;
+    }
+    tbody tr:hover {
+        background-color: #f1f1f1;
+    }
+    .badge {
+        font-size: 0.9rem;
+    }
+    .mdc-button {
+        margin: 0 5px;
+    }
+</style>

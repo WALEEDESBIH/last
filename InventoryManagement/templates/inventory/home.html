@@ -1,0 +1,214 @@
+
+{% extends "partials/base.html" %} {% load humanize %} {% block pageContent %}
+{% if user.is_authenticated %}
+<div class="mdc-layout-grid__cell stretch-card mdc-layout-grid__cell--span-12">
+    <div class="mdc-card">
+        <div class="d-flex justify-content-between">
+            <h4 class="card-title mb-0">Home Page</h4>
+        </div>
+            <!-- Low Stock and Expiry Display -->
+            <div class="container my-4">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h4>Low Stock Alerts</h4>
+                        <div class="card">
+                            <div class="card-body">
+                                {% if low_stock_items %}
+                                    <ul class="list-group">
+                                        {% for item in low_stock_items %}
+                                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                {{ item.name }} - Current Stock: {{ item.stocks_availability }}
+                                                <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#lowStockModal">Report</button>
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                {% else %}
+                                    <p>No low stock items.</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+        
+                    <div class="col-md-6">
+                        <h4>Expiry Notifications</h4>
+                        <div class="card">
+                            <div class="card-body">
+                                {% if expiring_items %}
+                                    <ul class="list-group">
+                                        {% for item in expiring_items %}
+                                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                {{ item.material__name }} - Expiration Date: {{ item.expiration_date }} - Quantity: {{ item.total_quantity  }}
+                                                <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#expiryModal">Report</button>
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                {% else %}
+                                    <p>No items nearing expiration.</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+    
+            <!-- Modal for Low Stock Reporting -->
+            <div class="modal fade" id="lowStockModal" tabindex="-1" aria-labelledby="lowStockModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="lowStockModalLabel">Low Stock Items</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form id="lowStockReportForm">
+                                <ul class="list-group">
+                                    {% for item in low_stock_items %}
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            {{ item.name }}
+                                            <input type="checkbox" name="items" value="{{ item.id }}">
+                                        </li>
+                                    {% endfor %}
+                                </ul>
+                                <input type="hidden" name="issue_type" value="low_stock">
+                                <button type="button" class="btn btn-warning mt-3" id="reportLowStock">Report Low Stock</button>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+                    <!-- Modal for Expiry Reporting -->
+        <div class="modal fade" id="expiryModal" tabindex="-1" aria-labelledby="expiryModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="expiryModalLabel">Expiring Items</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="expiryReportForm">
+                            <ul class="list-group">
+                                {% for item in expiring_items %}
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        {{ item.material__name }}
+                                        <input type="checkbox" name="items" value="{{ item.id }}">
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                            <input type="hidden" name="issue_type" value="expiry">
+                            <button type="button" class="btn btn-danger mt-3" id="reportExpiry">Report Expiry</button>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                // Low Stock Reporting
+                document.getElementById('reportLowStock').addEventListener('click', function() {
+                    const form = document.getElementById('lowStockReportForm');
+                    const formData = new FormData(form);
+
+                    fetch("{% url 'inventory:report_stock_issue' %}", {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-CSRFToken': '{{ csrf_token }}'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        alert(data.message);
+                        if (data.status === 'success') {
+                            $('#lowStockModal').modal('hide');  // Close the modal
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+                });
+
+                // Expiry Reporting
+                document.getElementById('reportExpiry').addEventListener('click', function() {
+                    const form = document.getElementById('expiryReportForm');
+                    const formData = new FormData(form);
+
+                    fetch("{% url 'inventory:report_stock_issue' %}", {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-CSRFToken': '{{ csrf_token }}'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        alert(data.message);
+                        if (data.status === 'success') {
+                            $('#expiryModal').modal('hide');  // Close the modal
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+                });
+            });
+        </script>
+    </div>
+</div>
+<div class="mdc-layout-grid__cell stretch-card mdc-layout-grid__cell--span-12">
+    <hr class="w-100">
+</div>
+<div class="mdc-layout-grid__cell stretch-card mdc-layout-grid__cell--span-3-desktop mdc-layout-grid__cell--span-3-tablet">
+    <div class="mdc-card info-card info-card--success">
+        <div class="card-inner">
+            <h5 class="card-title">Categories</h5>
+            <h5 class="font-weight-light pb-2 mb-1 border-bottom">{{ categories|intcomma }}</h5>
+            <p class="tx-12 text-muted">Over All Count of Categories</p>
+            <div class="card-icon-wrapper">
+                <i class="material-icons">list</i>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="mdc-layout-grid__cell stretch-card mdc-layout-grid__cell--span-3-desktop mdc-layout-grid__cell--span-3-tablet">
+    <div class="mdc-card info-card info-card--primary">
+        <div class="card-inner">
+            <h5 class="card-title">Products</h5>
+            <h5 class="font-weight-light pb-2 mb-1 border-bottom">{{ products|intcomma }}</h5>
+            <p class="tx-12 text-muted">Over All Count of Products</p>
+            <div class="card-icon-wrapper">
+                <i class="material-icons">label</i>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="mdc-layout-grid__cell stretch-card mdc-layout-grid__cell--span-3-desktop mdc-layout-grid__cell--span-3-tablet">
+    <div class="mdc-card info-card info-card--info">
+        <div class="card-inner">
+            <h5 class="card-title">Today's Transactions</h5>
+            <h5 class="font-weight-light pb-2 mb-1 border-bottom">{{ transaction|intcomma }}</h5>
+            <p class="tx-12 text-muted">Over All Count of Today's Transactions</p>
+            <div class="card-icon-wrapper">
+                <i class="material-icons">receipt</i>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="mdc-layout-grid__cell stretch-card mdc-layout-grid__cell--span-3-desktop mdc-layout-grid__cell--span-3-tablet">
+    <div class="mdc-card info-card info-card--warning">
+        <div class="card-inner">
+            <h5 class="card-title">Today's Sales</h5>
+            <h5 class="font-weight-light pb-2 mb-1 border-bottom">{{ total_sales|intcomma }}</h5>
+            <p class="tx-12 text-muted">Total Sales Today</p>
+            <div class="card-icon-wrapper">
+                <i class="mdi mdi-cash-multiple"></i>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Graph Section -->
+{% include 'inventory/charts.html' %}
+{% endif %}
+{% endblock pageContent %}

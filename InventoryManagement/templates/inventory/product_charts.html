@@ -1,0 +1,103 @@
+
+
+<div class="mdc-layout-grid__cell stretch-card mdc-layout-grid__cell--span-12">
+    <div class="mdc-card">
+        <span>Next to be sold: </span>
+        <div class="table-responsive">
+            <table class="table table-hover table-striped table-bordered">
+                <thead class="table-dark">
+                    <tr>
+                        <th class="text-center py-2">Quantity</th>
+                        <th class="text-center py-2">Expiry Date</th>
+                        <th class="text-center py-2">Location</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in in_items %}
+                    <tr>
+                        <td class="text-center align-middle">{{ item.quantity }}</td>
+                        <td class="text-center align-middle">{{ item.expiration_date }}</td>
+                        <td class="text-center align-middle">{{ item.material.location }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="mdc-layout-grid__cell stretch-card mdc-layout-grid__cell--span-12 d-flex justify-content-center my-4">
+    <div class="container">
+        <div class="row justify-content-center">
+            <!-- Bar Chart -->
+            <div class="col-24 col-md-12 mb-8">
+                <div class="mdc-card">
+                    <h2 class="mt-5">Product Revenue</h2>
+                    <div id="revenueChart"></div>                    
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="mdc-layout-grid__cell stretch-card mdc-layout-grid__cell--span-12 d-flex justify-content-center my-4">
+    <div class="container">
+        <div class="row justify-content-center">
+            <!-- Bar Chart -->
+            <div class="col-24 col-md-12 mb-8">
+                <div class="mdc-card">
+                    <h2 class="mt-5">Sales Frequency</h2>
+                    <div id="salesFrequencyChart"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script>
+// Pass the actual revenue and sales frequency data from the Django context
+const revenueData = {{ revenue_data|safe }}; // Safe to allow rendering as JavaScript array
+const salesFrequencyData = {{ sales_frequency_data|safe }}; // Safe to allow rendering as JavaScript array
+
+// Create the line chart for revenue
+const revenueTrace = {
+x: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+y: revenueData,
+mode: 'lines+markers',
+type: 'scatter',
+name: 'Revenue',
+};
+
+const revenueLayout = {
+title: 'Product Revenue',
+xaxis: {
+    title: 'Months',
+},
+yaxis: {
+    title: 'Revenue',
+},
+};
+
+Plotly.newPlot('revenueChart', [revenueTrace], revenueLayout);
+
+// Create the bar chart for sales frequency
+const frequencyTrace = {
+x: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+y: salesFrequencyData,
+type: 'bar',
+name: 'Sales Frequency',
+};
+
+const frequencyLayout = {
+title: 'Sales Frequency by Month',
+xaxis: {
+    title: 'Months',
+},
+yaxis: {
+    title: 'Number of Sales',
+},
+};
+
+Plotly.newPlot('salesFrequencyChart', [frequencyTrace], frequencyLayout);
+</script>
